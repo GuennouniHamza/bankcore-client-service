@@ -1,14 +1,18 @@
 package ma.bankcore.client_service.service.impl;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import ma.bankcore.client_service.dto.ClientRequest;
 import ma.bankcore.client_service.dto.ClientResponse;
 import ma.bankcore.client_service.entity.Client;
+import ma.bankcore.client_service.entity.StatutClient;
+import ma.bankcore.client_service.exception.ClientNotFoundException;
 import ma.bankcore.client_service.exception.EmailDejaUtiliseException;
 import ma.bankcore.client_service.mapper.ClientMapper;
 import ma.bankcore.client_service.repository.ClientRepository;
@@ -22,9 +26,10 @@ public class ClientServiceImpl implements ClientService {
 	private final ClientMapper clientMapper;
 	
 	@Override
+	@Transactional
 	public ClientResponse creerClient(ClientRequest request) {
-		if(clientRepository.existByEmail(request.getEmail())) {
-			throw new EmailDejaUtiliseException(request.getEmail())
+		if(clientRepository.existsByEmail(request.getEmail())) {
+			throw new EmailDejaUtiliseException(request.getEmail());
 		}
 		Client client = clientMapper.toEntity(request);
 		Client saved =clientRepository.save(client);
@@ -32,23 +37,35 @@ public class ClientServiceImpl implements ClientService {
 		return clientMapper.toResponse(saved);
 	}
 	@Override
+	@Transactional(readOnly = true)
 	public ClientResponse getClientById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		Client client =clientRepository.findById(id)
+			.orElseThrow(()->new ClientNotFoundException(id));
+		return clientMapper.toResponse(client);
 	}
 	@Override
+	@Transactional(readOnly = true)
 	public Page<ClientResponse> getAllClients(Pageable pageable) {
-		// TODO Auto-generated method stub
-		return null;
+		return clientRepository.findAll(pageable)
+		        .map(clientMapper::toResponse);
 	}
 	@Override
+	@Transactional
 	public ClientResponse updateClient(Long id, ClientRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		Client client =clientRepository.findById(id)
+				.orElseThrow(()->new ClientNotFoundException(id));
+		client.setNom(request.getNom());
+	    client.setPrenom(request.getPrenom());
+	    client.setTelephone(request.getTelephone());
+	    
+	    return clientMapper.toResponse(client);
 	}
 	@Override
+	@Transactional 
 	public void supprimerClient(Long id) {
-		// TODO Auto-generated method stub
+		Client client =clientRepository.findById(id)
+				.orElseThrow(()->new ClientNotFoundException(id));
+		client.setStatut(StatutClient.CLOTURE);
 		
 	}
 	

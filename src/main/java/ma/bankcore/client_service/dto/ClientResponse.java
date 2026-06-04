@@ -6,8 +6,7 @@ import ma.bankcore.client_service.entity.StatutClient;
 
 import java.time.LocalDateTime;
 
-//Dès que tu as une classe avec des champs privés que tu veux lire ou modifier →
-//mets @Data
+
 
 @Data
 @Builder

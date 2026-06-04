@@ -1,6 +1,6 @@
 package ma.bankcore.client_service.service;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.data.domain.Page;
 
