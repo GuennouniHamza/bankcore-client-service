@@ -2,7 +2,6 @@ package ma.bankcore.client_service.service.impl;
 
 import org.springframework.data.domain.Pageable;
 
-
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -19,55 +18,58 @@ import ma.bankcore.client_service.repository.ClientRepository;
 import ma.bankcore.client_service.service.ClientService;
 
 @Service
-@RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
-	
+
 	private final ClientRepository clientRepository;
 	private final ClientMapper clientMapper;
-	
+
+	public ClientServiceImpl(ClientRepository clientRepository, ClientMapper clientMapper) {
+		this.clientRepository = clientRepository;
+		this.clientMapper = clientMapper;
+	}
+
 	@Override
 	@Transactional
 	public ClientResponse creerClient(ClientRequest request) {
-		if(clientRepository.existsByEmail(request.getEmail())) {
+		if (clientRepository.existsByEmail(request.getEmail())) {
 			throw new EmailDejaUtiliseException(request.getEmail());
 		}
 		Client client = clientMapper.toEntity(request);
-		Client saved =clientRepository.save(client);
-		
+		Client saved = clientRepository.save(client);
+
 		return clientMapper.toResponse(saved);
 	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public ClientResponse getClientById(Long id) {
-		Client client =clientRepository.findById(id)
-			.orElseThrow(()->new ClientNotFoundException(id));
+		Client client = clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));
 		return clientMapper.toResponse(client);
 	}
+
 	@Override
 	@Transactional(readOnly = true)
 	public Page<ClientResponse> getAllClients(Pageable pageable) {
-		return clientRepository.findAll(pageable)
-		        .map(clientMapper::toResponse);
+		return clientRepository.findAll(pageable).map(clientMapper::toResponse);
 	}
+
 	@Override
 	@Transactional
 	public ClientResponse updateClient(Long id, ClientRequest request) {
-		Client client =clientRepository.findById(id)
-				.orElseThrow(()->new ClientNotFoundException(id));
+		Client client = clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));
 		client.setNom(request.getNom());
-	    client.setPrenom(request.getPrenom());
-	    client.setTelephone(request.getTelephone());
-	    
-	    return clientMapper.toResponse(client);
+		client.setPrenom(request.getPrenom());
+		client.setTelephone(request.getTelephone());
+
+		return clientMapper.toResponse(client);
 	}
+
 	@Override
-	@Transactional 
+	@Transactional
 	public void supprimerClient(Long id) {
-		Client client =clientRepository.findById(id)
-				.orElseThrow(()->new ClientNotFoundException(id));
+		Client client = clientRepository.findById(id).orElseThrow(() -> new ClientNotFoundException(id));
 		client.setStatut(StatutClient.CLOTURE);
-		
+
 	}
-	
-	
+
 }

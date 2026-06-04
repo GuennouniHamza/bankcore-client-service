@@ -11,7 +11,7 @@ import ma.bankcore.client_service.entity.Client;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long>{
 	
-	boolean existByEmail(String email);
+	boolean existsByEmail(String email);
 	
 	Optional<Client>findByEmail(String email);
 	
