@@ -38,7 +38,7 @@ public class SecurityConfig {
 	public JwtAuthenticationConverter jwtAuthenticationConverter() {
 	    JwtGrantedAuthoritiesConverter converter = 
 	        new JwtGrantedAuthoritiesConverter();
-	    converter.setAuthoritiesClaimName("realm_access.roles");
+	    converter.setAuthoritiesClaimName("realm_access.roles");//ou chercher les roles dans le JWT 
 	    converter.setAuthorityPrefix("ROLE_");
 
 	    JwtAuthenticationConverter jwtConverter = 

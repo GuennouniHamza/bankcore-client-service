@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class ClientController {
 	}
 	
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Créer un nouveau client")
 	public ResponseEntity<ClientResponse> creerClient(
 	        @Valid @RequestBody ClientRequest request) {
@@ -42,7 +44,7 @@ public class ClientController {
 	}
 	
 	@GetMapping
-	
+	@PreAuthorize("hasAnyRole('ADMIN', 'CONSEILLER')")
 	@Operation(summary = "Lister tous les clients")
 
 	public ResponseEntity <Page<ClientResponse>> getAllClients(
@@ -51,6 +53,7 @@ public class ClientController {
 	}
 	
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Modifier un client")
 	public ResponseEntity <ClientResponse> updateClient(
 			@PathVariable Long id,
@@ -58,12 +61,14 @@ public class ClientController {
 		return ResponseEntity.ok(clientService.updateClient(id, request));
 	}
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'CONSEILLER')")
 	@Operation(summary = "Récupérer un client par ID")
 	public ResponseEntity<ClientResponse> getClient(@PathVariable Long id) {
 	    return ResponseEntity.ok(clientService.getClientById(id));
 	}
 
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@Operation(summary = "Clôturer un client")
 	public ResponseEntity<Void> supprimerClient(@PathVariable Long id) {
 	    clientService.supprimerClient(id);
