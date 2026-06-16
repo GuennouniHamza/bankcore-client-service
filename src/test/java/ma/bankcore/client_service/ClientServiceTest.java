@@ -2,7 +2,12 @@ package ma.bankcore.client_service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ma.bankcore.client_service.dto.ClientRequest;
 import ma.bankcore.client_service.dto.ClientResponse;
 import ma.bankcore.client_service.entity.Client;
+import ma.bankcore.client_service.exception.EmailDejaUtiliseException;
 import ma.bankcore.client_service.mapper.ClientMapper;
 import ma.bankcore.client_service.repository.ClientRepository;
 import ma.bankcore.client_service.service.impl.ClientServiceImpl;
@@ -29,7 +35,8 @@ class ClientServiceTest {
     @InjectMocks
     private ClientServiceImpl clientService;
     // → vrai service avec faux repository et faux mapper
-    @Test
+    
+    @Test//JUnit l'exécute automatiquement, c une meth de test 
     void testCreerClient_Success() {
         // GIVEN — préparer les données
         ClientRequest request = new ClientRequest();
@@ -58,5 +65,24 @@ class ClientServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
         assertEquals("Hamza", result.getNom());
+    }
+    
+    @Test
+    void testCreerClient_EmailDejaUtilise() {
+        // GIVEN
+        ClientRequest request = new ClientRequest();
+        request.setEmail("hamza@bankcore.ma");
+
+        // WHEN
+        when(clientRepository.existsByEmail("hamza@bankcore.ma"))
+            .thenReturn(true); // ← email déjà utilisé !
+
+        // THEN
+        //vérifier exception levée
+        assertThrows(EmailDejaUtiliseException.class,
+            () -> clientService.creerClient(request));
+
+        // Vérifier que save() n'a jamais été appelé
+        verify(clientRepository, never()).save(any());
     }
 }
