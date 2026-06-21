@@ -46,6 +46,7 @@ public class ClientRequest {
     private String prenom;
 
     @Email(message = "Email invalide")
+    
     @NotBlank(message = "L'email est obligatoire")
     private String email;
 
