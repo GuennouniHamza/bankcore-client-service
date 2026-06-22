@@ -9,6 +9,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Configuration //classe contient des configurations charge le au demarage
 @EnableWebSecurity
@@ -34,7 +39,7 @@ public class SecurityConfig {
 	        );
 	    return http.build();
 	}
-	@Bean
+/*	@Bean
 	public JwtAuthenticationConverter jwtAuthenticationConverter() {
 	    JwtGrantedAuthoritiesConverter converter = 
 	        new JwtGrantedAuthoritiesConverter();
@@ -45,5 +50,25 @@ public class SecurityConfig {
 	        new JwtAuthenticationConverter();
 	    jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
 	    return jwtConverter;
+	}*/
+	@Bean
+	public JwtAuthenticationConverter jwtAuthenticationConverter() {
+
+	    JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+
+	    converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+
+	        Map<String, Object> realmAccess = jwt.getClaim("realm_access");
+
+	        if (realmAccess == null) return List.of();
+
+	        List<String> roles = (List<String>) realmAccess.get("roles");
+
+	        return roles.stream()
+	                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+	                .collect(Collectors.toList());
+	    });
+
+	    return converter;
 	}
 }
